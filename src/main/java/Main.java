@@ -28,7 +28,6 @@ public class Main {
         String json = listToJson(list);
         writeString(json, "data2.json");
 
-
         list =parseXML("data.xml");
         json = listToJson(list);
         writeString(json, "data2.json");
@@ -50,59 +49,31 @@ public class Main {
     }
 
     public static List<Employee> parseXML(String fileName) {
+        List<Employee> list = new ArrayList<>();
+
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.parse(new File(fileName));
 
-            Node root = doc.getDocumentElement();
-            NodeList employeeNodeList = root.getChildNodes();
-
-            List<Employee> list = new ArrayList<>();
-
-            for (int i = 0; i < employeeNodeList.getLength(); i++) {
-                Node employeeNode = employeeNodeList.item(i);
-                if (employeeNode.getNodeType() != Node.ELEMENT_NODE || !"employee".equals(employeeNode.getNodeName())) continue;
-
+            NodeList nodeList = doc.getElementsByTagName("employee");
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Element el = (Element)nodeList.item(i);
                 Employee employee = new Employee();
                 list.add(employee);
-
-                NodeList nodeListProperties = employeeNode.getChildNodes();
-                for (int k = 0; k < nodeListProperties.getLength(); k++) {
-                    Node nodeProperty = nodeListProperties.item(k);
-                    if (Node.ELEMENT_NODE != nodeProperty.getNodeType()) continue;
-
-                    String name = nodeProperty.getNodeName();
-                    if ("id".equals(name))
-                    {
-                        employee.id = Long.parseLong(nodeProperty.getFirstChild().getNodeValue());
-                    }
-                    else if ("firstName".equals(name))
-                    {
-                        employee.firstName = nodeProperty.getFirstChild().getNodeValue();
-                    }
-                    else if ("lastName".equals(name))
-                    {
-                        employee.lastName = nodeProperty.getFirstChild().getNodeValue();
-                    }
-                    else if ("country".equals(name))
-                    {
-                        employee.country = nodeProperty.getFirstChild().getNodeValue();
-                    }
-                    else if ("age".equals(name))
-                    {
-                        employee.age = Integer.parseInt(nodeProperty.getFirstChild().getNodeValue());
-                    }
-                }
+                employee.id = Long.parseLong(el.getElementsByTagName("id").item(0).getFirstChild().getNodeValue());
+                employee.firstName = el.getElementsByTagName("firstName").item(0).getFirstChild().getNodeValue();
+                employee.lastName = el.getElementsByTagName("lastName").item(0).getFirstChild().getNodeValue();
+                employee.country = el.getElementsByTagName("country").item(0).getFirstChild().getNodeValue();
+                employee.age = Integer.parseInt(el.getElementsByTagName("age").item(0).getFirstChild().getNodeValue());
             }
-            return list;
         } catch (IOException | SAXException e) {
             e.printStackTrace();
-            return new ArrayList<Employee>();
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
-            return new ArrayList<Employee>();
         }
+
+        return list;
     }
 
     public static String listToJson(List<Employee> list) {
